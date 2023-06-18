@@ -1,0 +1,25 @@
+package com.example.membermanager.member;
+
+import com.example.membermanager.member.dto.MemberRequestDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/member")
+public class MemberController {
+
+    private final MemberService memberService;
+
+    @PostMapping("")
+    public ResponseEntity<String> createMember(@RequestBody MemberRequestDto memberRequestDto){
+        memberService.createMember(memberRequestDto);
+        return new ResponseEntity<>("회원가입 성공", HttpStatus.OK);
+    }
+
+}
