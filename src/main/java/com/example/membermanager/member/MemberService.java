@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -22,6 +23,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final ConcurrentHashMap<String, String> loginStatus;
 
     @Transactional
     public void createMember(MemberRequestDto memberRequestDto){
@@ -32,7 +34,6 @@ public class MemberService {
         Optional<Member> checkNickname = memberRepository.findByNickname(memberRequestDto.getNickname());
         if(checkNickname.isPresent()) throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
 
-        //memberRequestDto.encodePassword(passwordEncoder.encode(memberRequestDto.getPassword()));
         passwordEncoder(memberRequestDto);
 
         Member member = MemberMapper.INSTANCE.toMember(memberRequestDto);
@@ -41,7 +42,7 @@ public class MemberService {
 
     @Transactional
     public void signIn(MemberRequestDto memberRequestDto, HttpServletResponse response){
-        //passwordEncoder(memberRequestDto);
+
         String memberId = memberRequestDto.getMemberId();
         String password = memberRequestDto.getPassword();
 
@@ -50,7 +51,6 @@ public class MemberService {
         );
 
         if(!passwordEncoder.matches(password, member.getPassword())){
-            log.info("input pw: " + password + ", db pw : " + member.getPassword());
             throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
         }
 
@@ -58,7 +58,7 @@ public class MemberService {
 
     }
 
-    public void passwordEncoder(MemberRequestDto memberRequestDto){
+    private void passwordEncoder(MemberRequestDto memberRequestDto){
         memberRequestDto.encodePassword(passwordEncoder.encode(memberRequestDto.getPassword()));
     }
 
